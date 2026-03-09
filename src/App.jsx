@@ -4,6 +4,7 @@ import Dashboard from "./pages/Dashboard"
 import AddAttendance from "./pages/AddAttendance"
 import History from "./pages/History"
 import ChangePassword from "./pages/ChangePassword"
+import ReminderSettings from "./pages/ReminderSettings"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
 import Schedules from "./pages/Schedules"
@@ -86,6 +87,15 @@ function App() {
           element={
             <ProtectedRoute>
               <ChangePassword />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/reminder-settings"
+          element={
+            <ProtectedRoute>
+              <ReminderSettings />
             </ProtectedRoute>
           }
         />

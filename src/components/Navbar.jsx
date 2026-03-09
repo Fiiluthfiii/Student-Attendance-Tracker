@@ -37,6 +37,9 @@ function Navbar() {
           <NavLink to="/schedules" className={linkClass}>
             Jadwal
           </NavLink>
+          <NavLink to="/reminder-settings" className={linkClass}>
+            Pengingat
+          </NavLink>
         </nav>
 
         <div className="flex items-center gap-2 order-2 sm:order-3 ml-auto">

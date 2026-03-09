@@ -17,7 +17,23 @@ const colorOptions = [
   { label: "Merah", value: "#ef4444" },
   { label: "Ungu", value: "#a855f7" },
   { label: "Pink", value: "#ec4899" },
+  { label: "Teal", value: "#14b8a6" },
+  { label: "Indigo", value: "#6366f1" },
+  { label: "Amber", value: "#f59e0b" },
+  { label: "Lime", value: "#84cc16" },
+  { label: "Rose", value: "#f43f5e" },
+  { label: "Slate", value: "#475569" },
 ]
+
+const dayThemes = {
+  Senin: { bg: "#eff6ff", border: "#bfdbfe", text: "#1d4ed8" },
+  Selasa: { bg: "#f0fdf4", border: "#bbf7d0", text: "#15803d" },
+  Rabu: { bg: "#fff7ed", border: "#fed7aa", text: "#c2410c" },
+  Kamis: { bg: "#f5f3ff", border: "#ddd6fe", text: "#6d28d9" },
+  Jumat: { bg: "#fdf2f8", border: "#fbcfe8", text: "#be185d" },
+  Sabtu: { bg: "#f0fdfa", border: "#99f6e4", text: "#0f766e" },
+  Minggu: { bg: "#fefce8", border: "#fde68a", text: "#a16207" },
+}
 
 const emptyForm = {
   matkul: "",
@@ -220,7 +236,7 @@ function Schedules() {
               required
             />
 
-            <div className="field flex items-center gap-2">
+            <div className="field flex items-center gap-2 flex-wrap">
               {colorOptions.map((color) => (
                 <button
                   key={color.value}
@@ -228,7 +244,7 @@ function Schedules() {
                   aria-label={color.label}
                   title={color.label}
                   onClick={() => setForm((prev) => ({ ...prev, warna: color.value }))}
-                  className={`h-7 w-7 rounded-full border-2 ${
+                  className={`h-7 w-7 min-h-7 min-w-7 shrink-0 rounded-full border-2 ${
                     form.warna === color.value ? "border-slate-900" : "border-white"
                   }`}
                   style={{ backgroundColor: color.value }}
@@ -257,8 +273,17 @@ function Schedules() {
 
           <div className="grid grid-cols-1 lg:grid-cols-7 gap-3">
             {days.map((day) => (
-              <div key={day} className="rounded-xl border border-slate-200 bg-white p-3 min-h-[220px]">
-                <h3 className="font-semibold text-sm mb-2">{day}</h3>
+              <div
+                key={day}
+                className="rounded-xl border p-3 min-h-[220px]"
+                style={{
+                  backgroundColor: dayThemes[day].bg,
+                  borderColor: dayThemes[day].border,
+                }}
+              >
+                <h3 className="font-semibold text-sm mb-2" style={{ color: dayThemes[day].text }}>
+                  {day}
+                </h3>
 
                 <div className="space-y-2">
                   {groupedSchedules[day].length ? (

@@ -16,7 +16,7 @@ function AddAttendance() {
   const [catatan, setCatatan] = useState("")
   const [file, setFile] = useState(null)
   const [preview, setPreview] = useState("")
-  const [showScanner, setShowScanner] = useState(false)
+  const [showCamera, setShowCamera] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [message, setMessage] = useState("")
   const [schedules, setSchedules] = useState([])
@@ -75,11 +75,14 @@ function AddAttendance() {
     }
   }, [availableCourses, matkul])
 
-  const handleScanSuccess = useCallback((decodedText) => {
-    const match = decodedText.match(/room\s*[:=-]\s*(.+)/i)
-    setRuangan(match ? match[1].trim() : decodedText)
-    setShowScanner(false)
-    setMessage("QR terbaca. Ruangan otomatis terisi.")
+  const handleCameraCapture = useCallback((capturedFile) => {
+    setFile(capturedFile)
+    setPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev)
+      return URL.createObjectURL(capturedFile)
+    })
+    setShowCamera(false)
+    setMessage("Foto berhasil diambil dari kamera.")
   }, [])
 
   const handleImageChange = (e) => {
@@ -189,14 +192,14 @@ function AddAttendance() {
                 onChange={(e) => setRuangan(e.target.value)}
                 className="field"
               />
-              <button type="button" className="btn-ghost whitespace-nowrap" onClick={() => setShowScanner((prev) => !prev)}>
-                {showScanner ? "Tutup QR" : "Scan QR"}
+              <button type="button" className="btn-ghost whitespace-nowrap" onClick={() => setShowCamera((prev) => !prev)}>
+                {showCamera ? "Tutup Kamera" : "Buka Kamera"}
               </button>
             </div>
 
-            {showScanner ? (
+            {showCamera ? (
               <div className="surface p-3 bg-slate-50/80">
-                <QRScanner onScanSuccess={handleScanSuccess} />
+                <QRScanner onCapture={handleCameraCapture} onError={setMessage} />
               </div>
             ) : null}
 
