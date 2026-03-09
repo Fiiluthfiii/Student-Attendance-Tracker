@@ -1,0 +1,69 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand: 15 23 42;
+  --accent: 14 116 144;
+  --accent-2: 249 115 22;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    font-family: "Space Grotesk", sans-serif;
+    background:
+      radial-gradient(circle at 8% 4%, rgba(56, 189, 248, 0.18), transparent 35%),
+      radial-gradient(circle at 85% 10%, rgba(251, 146, 60, 0.16), transparent 32%),
+      linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    color: rgb(var(--brand));
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer components {
+  .surface {
+    @apply bg-white/90 backdrop-blur border border-white/80 shadow-[0_10px_35px_-18px_rgba(15,23,42,0.25)] rounded-2xl;
+  }
+
+  .page-wrap {
+    @apply min-h-screen;
+  }
+
+  .page-content {
+    @apply max-w-6xl mx-auto px-4 py-8;
+  }
+
+  .field {
+    @apply w-full border border-slate-200 rounded-xl px-3 py-2.5 bg-white/90 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-4 py-2.5 rounded-xl text-white font-medium bg-gradient-to-r from-cyan-600 to-sky-700 hover:from-cyan-700 hover:to-sky-800 transition disabled:opacity-60;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center px-4 py-2.5 rounded-xl border border-slate-200 bg-white/90 hover:bg-slate-50 transition;
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center px-4 py-2.5 rounded-xl border border-rose-200 text-rose-600 bg-rose-50/40 hover:bg-rose-50 transition;
+  }
+
+  .pill {
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
+  }
+}
