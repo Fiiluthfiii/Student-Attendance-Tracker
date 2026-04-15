@@ -16,26 +16,36 @@ create table if not exists public.reminder_logs (
   status text not null default 'sent'
 );
 
+alter table public.reminder_logs
+  add column if not exists schedule_name text;
+
+alter table public.reminder_logs
+  add column if not exists error_message text;
+
 alter table public.reminder_settings enable row level security;
 alter table public.reminder_logs enable row level security;
 
-create policy if not exists "reminder settings own row select"
+drop policy if exists "reminder settings own row select" on public.reminder_settings;
+create policy "reminder settings own row select"
   on public.reminder_settings
   for select
   using (auth.uid() = user_id);
 
-create policy if not exists "reminder settings own row upsert"
+drop policy if exists "reminder settings own row upsert" on public.reminder_settings;
+create policy "reminder settings own row upsert"
   on public.reminder_settings
   for insert
   with check (auth.uid() = user_id);
 
-create policy if not exists "reminder settings own row update"
+drop policy if exists "reminder settings own row update" on public.reminder_settings;
+create policy "reminder settings own row update"
   on public.reminder_settings
   for update
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
-create policy if not exists "reminder logs own row select"
+drop policy if exists "reminder logs own row select" on public.reminder_logs;
+create policy "reminder logs own row select"
   on public.reminder_logs
   for select
   using (auth.uid() = user_id);

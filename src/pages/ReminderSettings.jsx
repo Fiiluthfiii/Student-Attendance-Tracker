@@ -1,11 +1,22 @@
 import { useEffect, useState } from "react"
 import Navbar from "../components/Navbar"
 import {
+  getReminderLogs,
   getReminderSettings,
   saveReminderSettings,
   sendTestReminderEmail,
 } from "../services/reminderService"
 import useAuthStore from "../store/useAuthStore"
+
+const formatDateTime = (value) => {
+  if (!value) return "-"
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return "-"
+  return new Intl.DateTimeFormat("id-ID", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date)
+}
 
 function ReminderSettings() {
   const { user } = useAuthStore()
@@ -16,11 +27,15 @@ function ReminderSettings() {
   const [saving, setSaving] = useState(false)
   const [sendingTest, setSendingTest] = useState(false)
   const [message, setMessage] = useState("")
+  const [logs, setLogs] = useState([])
+  const [logsLoading, setLogsLoading] = useState(true)
+  const [logsRefreshing, setLogsRefreshing] = useState(false)
+  const [logsError, setLogsError] = useState("")
 
   useEffect(() => {
     let active = true
 
-    const load = async () => {
+    const loadSettings = async () => {
       try {
         const data = await getReminderSettings(user.id)
         if (!active) return
@@ -35,11 +50,39 @@ function ReminderSettings() {
       }
     }
 
-    load()
+    const loadLogs = async () => {
+      try {
+        const rows = await getReminderLogs(user.id, 20)
+        if (!active) return
+        setLogs(rows)
+        setLogsError("")
+      } catch (err) {
+        if (active) setLogsError(`Gagal memuat riwayat: ${err.message}`)
+      } finally {
+        if (active) setLogsLoading(false)
+      }
+    }
+
+    loadSettings()
+    loadLogs()
+
     return () => {
       active = false
     }
   }, [user.email, user.id])
+
+  const refreshLogs = async () => {
+    setLogsRefreshing(true)
+    try {
+      const rows = await getReminderLogs(user.id, 20)
+      setLogs(rows)
+      setLogsError("")
+    } catch (err) {
+      setLogsError(`Gagal memuat riwayat: ${err.message}`)
+    } finally {
+      setLogsRefreshing(false)
+    }
+  }
 
   const handleSave = async (e) => {
     e.preventDefault()
@@ -67,6 +110,7 @@ function ReminderSettings() {
     try {
       await sendTestReminderEmail(gmail.trim())
       setMessage("Email test berhasil dikirim. Cek inbox/spam Gmail kamu.")
+      await refreshLogs()
     } catch (err) {
       setMessage(`Gagal kirim email test: ${err.message}`)
     } finally {
@@ -143,10 +187,62 @@ function ReminderSettings() {
 
           {message ? <p className="text-sm text-slate-600">{message}</p> : null}
         </section>
+
+        <section className="surface p-6 md:p-8 space-y-4">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-xl font-semibold">Riwayat Status Kirim</h2>
+            <button type="button" className="btn-ghost" onClick={refreshLogs} disabled={logsRefreshing}>
+              {logsRefreshing ? "Memuat ulang..." : "Muat Ulang"}
+            </button>
+          </div>
+
+          {logsLoading ? <p className="text-sm text-slate-500">Memuat riwayat...</p> : null}
+          {logsError ? <p className="text-sm text-rose-600">{logsError}</p> : null}
+
+          {!logsLoading && !logsError && logs.length === 0 ? (
+            <p className="text-sm text-slate-500">Belum ada riwayat pengiriman reminder.</p>
+          ) : null}
+
+          {!logsLoading && !logsError && logs.length > 0 ? (
+            <div className="space-y-2">
+              {logs.map((row) => {
+                const status = (row.status || "").toLowerCase()
+                const isSent = status === "sent"
+                const statusLabel = isSent ? "Berhasil" : "Gagal"
+                const scheduleName =
+                  row.schedule_name || (row.schedule_id ? `Jadwal #${row.schedule_id}` : "Jadwal tidak diketahui")
+                const reason = isSent ? "-" : row.error_message || "Tidak ada detail error."
+
+                return (
+                  <article
+                    key={row.id}
+                    className="rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-700"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span
+                        className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${
+                          isSent ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"
+                        }`}
+                      >
+                        {statusLabel}
+                      </span>
+                      <span className="font-medium">{scheduleName}</span>
+                    </div>
+
+                    <p className="mt-1 text-slate-600">
+                      Trigger: {formatDateTime(row.trigger_at)} | Terkirim: {formatDateTime(row.sent_at)}
+                    </p>
+                    <p className="text-slate-600">Tujuan: {row.email_to || "-"}</p>
+                    <p className="text-slate-600">Alasan: {reason}</p>
+                  </article>
+                )
+              })}
+            </div>
+          ) : null}
+        </section>
       </main>
     </div>
   )
 }
 
 export default ReminderSettings
-
